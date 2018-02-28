@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FlappyXna.Objects;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -7,14 +8,20 @@ namespace FlappyXna
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
-    public class Game1 : Game
+    public class FlappyGame : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Panorama panorama;
+        Bird bird;
+        Ground ground;
 
-        public Game1()
+        public FlappyGame()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferHeight = 505;
+            graphics.PreferredBackBufferWidth = 288;
+            graphics.ApplyChanges();
             Content.RootDirectory = "Content";
         }
 
@@ -26,7 +33,18 @@ namespace FlappyXna
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            // Create a new SpriteBatch, which can be used to draw textures.
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+            this.Services.AddService<SpriteBatch>(spriteBatch);
+
+            panorama = new Panorama(this);
+            this.Components.Add(panorama);
+
+            bird = new Bird(this);
+            this.Components.Add(bird);
+
+            ground = new Ground(this);
+            this.Components.Add(ground);
 
             base.Initialize();
         }
@@ -37,10 +55,7 @@ namespace FlappyXna
         /// </summary>
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
-            spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
         }
 
         /// <summary>
@@ -73,11 +88,12 @@ namespace FlappyXna
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.FromNonPremultiplied(7,140,254,255));
 
             // TODO: Add your drawing code here
-
+            spriteBatch.Begin();
             base.Draw(gameTime);
+            spriteBatch.End();
         }
     }
 }
