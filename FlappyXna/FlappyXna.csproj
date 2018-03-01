@@ -45,6 +45,7 @@
     <Compile Include="Objects\Ground.cs" />
     <Compile Include="Objects\Panorama.cs" />
     <Compile Include="Objects\Bird.cs" />
+    <Compile Include="PhysicsEngine.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
