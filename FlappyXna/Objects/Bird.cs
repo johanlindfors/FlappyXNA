@@ -21,8 +21,9 @@ namespace FlappyXna.Objects
         public bool AllowGravity { get; set; }
         public bool IsCollidable { get; set; }
         public Action<IPhysicsBody> OnCollideWith { get; set; }
-        public Rectangle? AABB { get
-            {
+
+        public Rectangle? AABB {
+            get {
                 return new Rectangle( (int)(X - origin.X), (int)(Y -origin.Y), BIRD_SPRITE_WIDTH, BIRD_SPRITE_HEIGHT );
             }
         }
@@ -33,26 +34,35 @@ namespace FlappyXna.Objects
 
         public Bird(Game game) : base(game)
         {
-            X = 100;
-            Y = game.Window.ClientBounds.Height / 2;
+            Reset();
+            IsAlive = false;
+            AllowGravity = false;
+        }
 
-            Velocity = new Vector2(0, -400);
+        public void Reset()
+        {
+            X = 100;
+            Y = this.Game.Window.ClientBounds.Height / 2;
+
+            angle = 0;
+            currentTimeDelta = 0;
+            IsAlive = true;
             AllowGravity = true;
             OnCollideWith = OnCollide;
-            IsAlive = true;
             OnGround = false;
+            Velocity = new Vector2(0, -400);
         }
 
         public override void Initialize()
         {
-            spriteBatch = this.Game.Services.GetService<SpriteBatch>();
+            spriteBatch = Game.Services.GetService<SpriteBatch>();
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            texture = this.Game.Content.Load<Texture2D>("bird");
+            texture = Game.Content.Load<Texture2D>("bird");
             base.LoadContent();
         }
 
@@ -62,14 +72,14 @@ namespace FlappyXna.Objects
 
             if (IsAlive)
             {
-                this.Velocity = new Vector2(0, -400);
-                this.angle = -40f;
+                Velocity = new Vector2(0, -400);
+                angle = -60f;
             }
         }
 
         public override void Update(GameTime gameTime)
         {
-            if (!IsAlive) return;
+            if (OnGround) return;
 
             currentTimeDelta += gameTime.ElapsedGameTime.Milliseconds;
             if (currentTimeDelta > 1000 / 12)

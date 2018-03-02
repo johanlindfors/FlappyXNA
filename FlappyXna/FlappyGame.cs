@@ -25,7 +25,7 @@ namespace FlappyXna
             graphics.PreferredBackBufferWidth = 288;
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
-            gameOver = false;
+            gameOver = true;
         }
 
         protected override void Initialize()
@@ -61,6 +61,11 @@ namespace FlappyXna
             // TODO: Unload any non ContentManager content here
         }
 
+        private void StartGame()
+        {
+            bird.Reset();
+        }
+
         protected override void Update(GameTime gameTime)
         {
             physics.CheckCollision(bird, ground, OnBirdCollided);
@@ -70,11 +75,19 @@ namespace FlappyXna
             var currentKeyboardState = Keyboard.GetState();
             if (currentKeyboardState.IsKeyDown(Keys.Space) && lastKeyboardState.IsKeyUp(Keys.Space))
             {
-                gameOver = false;
-                bird.Flap();
+                if (gameOver)
+                {
+                    bird.Reset();
+                    gameOver = false;
+                    ground.IsAlive = true;
+                    panorama.IsAlive = true;
+                }
+                else
+                {
+                    bird.Flap();
+                }
             }
-            // TODO: Add your update logic here
-
+            
             base.Update(gameTime);
 
             lastKeyboardState = currentKeyboardState;
@@ -92,6 +105,8 @@ namespace FlappyXna
             {
                 gameOver = true;
                 actualBird.IsAlive = false;
+                ground.IsAlive = false;
+                panorama.IsAlive = false;
             }
         }
 
@@ -99,8 +114,7 @@ namespace FlappyXna
         {
             GraphicsDevice.Clear(Color.FromNonPremultiplied(7,140,254,255));
 
-            // TODO: Add your drawing code here
-            spriteBatch.Begin();
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.LinearWrap, null, null);
             base.Draw(gameTime);
             spriteBatch.End();
         }
