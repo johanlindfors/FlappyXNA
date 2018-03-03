@@ -12,7 +12,7 @@ namespace FlappyXna.Objects
     {
         private Texture2D texture;
         private SpriteBatch spriteBatch;
-        private const float GROUND_SPEED = 200f;
+        public const float GROUND_SPEED = 200f;
 
         public float X { get; set; }
         public float Y { get; set; }
@@ -66,7 +66,7 @@ namespace FlappyXna.Objects
 
         public override void Draw(GameTime gameTime)
         {
-            spriteBatch.Draw(texture, new Vector2(X, Y), sourceRectangle, Color.White);
+            spriteBatch.Draw(texture, new Vector2(X, Y), sourceRectangle, Color.White, 0f, Vector2.Zero, 1.0f, SpriteEffects.None, 1.0f);
             base.Draw(gameTime);
         }
     }

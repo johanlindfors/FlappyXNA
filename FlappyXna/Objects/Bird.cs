@@ -21,7 +21,7 @@ namespace FlappyXna.Objects
         public bool AllowGravity { get; set; }
         public bool IsCollidable { get; set; }
         public Action<IPhysicsBody> OnCollideWith { get; set; }
-
+        
         public Rectangle? AABB {
             get {
                 return new Rectangle( (int)(X - origin.X), (int)(Y -origin.Y), BIRD_SPRITE_WIDTH, BIRD_SPRITE_HEIGHT );

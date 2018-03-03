@@ -2,6 +2,10 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Timers;
 
 namespace FlappyXna
 {
@@ -12,11 +16,16 @@ namespace FlappyXna
         Panorama panorama;
         Bird bird;
         Ground ground;
+        List<Pipes> pipes;
 
         PhysicsEngine physics;
 
         KeyboardState lastKeyboardState;
         bool gameOver;
+        Random rnd;
+        int width = 0;
+
+        Timer pipeGenerator;
 
         public FlappyGame()
         {
@@ -26,6 +35,10 @@ namespace FlappyXna
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
             gameOver = true;
+            rnd = new Random(1223);
+
+            pipeGenerator = new Timer(1250);
+            pipeGenerator.Elapsed += (_,__) => GeneratePipes();
         }
 
         protected override void Initialize()
@@ -48,6 +61,10 @@ namespace FlappyXna
             this.Components.Add(ground);
             physics.AddBody(ground);
 
+            pipes = new List<Pipes>();
+
+            width = Window.ClientBounds.Width;
+
             base.Initialize();
         }
 
@@ -64,6 +81,7 @@ namespace FlappyXna
         private void StartGame()
         {
             bird.Reset();
+            pipeGenerator.Start();
         }
 
         protected override void Update(GameTime gameTime)
@@ -77,20 +95,43 @@ namespace FlappyXna
             {
                 if (gameOver)
                 {
-                    bird.Reset();
+                    StartGame();
                     gameOver = false;
                     ground.IsAlive = true;
                     panorama.IsAlive = true;
+                    pipes.Clear();
+                    pipeGenerator.Start();
                 }
                 else
                 {
                     bird.Flap();
                 }
             }
-            
+
+            pipes.ForEach(p => p.Update(gameTime));
+
             base.Update(gameTime);
 
             lastKeyboardState = currentKeyboardState;
+        }
+
+        private void GeneratePipes()
+        {
+            //if (System.Diagnostics.Debugger.IsAttached)
+            //{
+            //    pipeGenerator.Stop();
+            //}
+            var newPipes = pipes.Where(p => !p.IsAlive).FirstOrDefault();
+            if (newPipes == null)
+            {
+                newPipes = new Pipes(this);
+                pipes.Add(newPipes);
+            } else
+            {
+
+            }
+            var pipesY = (int)(rnd.NextDouble() * 200 - 100);
+           newPipes.Reset(width + 20, pipesY);
         }
 
         private void OnBirdCollided(IPhysicsBody bird, IPhysicsBody enemy)
@@ -107,15 +148,18 @@ namespace FlappyXna
                 actualBird.IsAlive = false;
                 ground.IsAlive = false;
                 panorama.IsAlive = false;
+                pipes.ForEach(p => p.IsAlive = false);
+                pipeGenerator.Stop();
             }
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.FromNonPremultiplied(7,140,254,255));
+            GraphicsDevice.Clear(Color.FromNonPremultiplied(7, 140, 254, 255));
 
-            spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.LinearWrap, null, null);
+            spriteBatch.Begin(SpriteSortMode.FrontToBack, null, SamplerState.LinearWrap, null, null);
             base.Draw(gameTime);
+            pipes.ForEach(p => p.Draw(gameTime));
             spriteBatch.End();
         }
     }
