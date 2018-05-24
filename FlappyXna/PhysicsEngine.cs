@@ -7,17 +7,32 @@ using System.Threading.Tasks;
 
 namespace FlappyXna
 {
-    interface IPhysicsBody
+    struct Sphere
     {
+        float CenterX { get; set; }
+        float CenterY { get; set; }
+        float Radius { get; set; }
+    }
+
+    interface IPhysicsEntity
+    {
+        bool IsAlive { get; }
         float X { get; set; }
         float Y { get; set; }
-        Vector2 Velocity { get; set; }
-        //Vector2 Acceleration { get; set; }
-        bool AllowGravity { get; set; }
+    }
+
+    interface ICollidable : IPhysicsEntity
+    {
         bool IsCollidable { get; set; }
-        Action<IPhysicsBody> OnCollideWith { get; set; }
+        Action<ICollidable> OnCollideWith { get; set; }
         Rectangle? AABB { get; }
-        bool IsAlive { get; }
+        //Sphere? Sphere { get; }
+    }
+
+    interface IPhysicsBody : IPhysicsEntity
+    {
+        Vector2 Velocity { get; set; }
+        bool AllowGravity { get; set; }
     }
 
     class PhysicsEngine : GameComponent
@@ -35,7 +50,7 @@ namespace FlappyXna
             bodies.Add(body);
         }
 
-        public bool CheckCollision(IPhysicsBody a, IPhysicsBody b, Action<IPhysicsBody, IPhysicsBody> collisionCallback)
+        public bool CheckCollision(ICollidable  a, ICollidable b, Action<ICollidable, ICollidable> collisionCallback)
         {
             bool intersects = false;
             if (a.AABB.HasValue)

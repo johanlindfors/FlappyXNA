@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FlappyXna.Objects
 {
-    class Ground : DrawableGameComponent, IPhysicsBody
+    class Ground : DrawableGameComponent, ICollidable
     {
         private Texture2D texture;
         private SpriteBatch spriteBatch;
@@ -16,10 +16,8 @@ namespace FlappyXna.Objects
 
         public float X { get; set; }
         public float Y { get; set; }
-        public Vector2 Velocity { get; set; }
-        public bool AllowGravity { get; set; }
         public bool IsCollidable { get; set; }
-        public Action<IPhysicsBody> OnCollideWith { get; set; }
+        public Action<ICollidable> OnCollideWith { get; set; }
         public bool IsAlive { get; set; }
 
         private Rectangle sourceRectangle;
@@ -33,7 +31,6 @@ namespace FlappyXna.Objects
 
         public Ground(Game game) : base(game)
         {
-            AllowGravity = false;
             X = 0;
             Y = 400;
 

@@ -1,30 +1,32 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Diagnostics;
 
 namespace FlappyXna.Objects
 {
-    class Bird : DrawableGameComponent, IPhysicsBody
+    class Bird : DrawableGameComponent, IPhysicsBody, ICollidable
     {
         private Texture2D texture;
+        private Texture2D debugTexture;
         private SpriteBatch spriteBatch;
         private int currentFrame = 0;
         private float currentTimeDelta = 0;
         private const int BIRD_SPRITE_WIDTH = 34;
         private const int BIRD_SPRITE_HEIGHT = 24;
         private float angle = 0.0f;
-        private Vector2 origin = new Vector2(BIRD_SPRITE_WIDTH / 2, BIRD_SPRITE_HEIGHT / 2);
+        private Vector2 origin = new Vector2(0.5f, 0.5f);
 
         public float X { get; set; }
         public float Y { get; set; }
         public Vector2 Velocity { get; set; }
         public bool AllowGravity { get; set; }
         public bool IsCollidable { get; set; }
-        public Action<IPhysicsBody> OnCollideWith { get; set; }
+        public Action<ICollidable> OnCollideWith { get; set; }
         
         public Rectangle? AABB {
             get {
-                return new Rectangle( (int)(X - origin.X), (int)(Y -origin.Y), BIRD_SPRITE_WIDTH, BIRD_SPRITE_HEIGHT );
+                return new Rectangle( (int)(X - origin.X * BIRD_SPRITE_WIDTH), (int)(Y - origin.Y * BIRD_SPRITE_HEIGHT), BIRD_SPRITE_WIDTH, BIRD_SPRITE_HEIGHT );
             }
         }
 
@@ -50,7 +52,7 @@ namespace FlappyXna.Objects
             AllowGravity = true;
             OnCollideWith = OnCollide;
             OnGround = false;
-            Velocity = new Vector2(0, -400);
+            Velocity = new Vector2(0, 0);
         }
 
         public override void Initialize()
@@ -63,6 +65,10 @@ namespace FlappyXna.Objects
         protected override void LoadContent()
         {
             texture = Game.Content.Load<Texture2D>("bird");
+
+            debugTexture = new Texture2D(GraphicsDevice, 1, 1);
+            Color[] pixels = { Color.Green };
+            debugTexture.SetData(pixels);
             base.LoadContent();
         }
 
@@ -73,7 +79,7 @@ namespace FlappyXna.Objects
             if (IsAlive)
             {
                 Velocity = new Vector2(0, -400);
-                angle = -60f;
+                this.angle = -60f;
             }
         }
 
@@ -89,7 +95,7 @@ namespace FlappyXna.Objects
                 currentFrame %= 3;
             }
 
-            if (this.angle < 90 && IsAlive )
+            if (this.angle < 90 && IsAlive)
             {
                 this.angle += 2.5f;
             }
@@ -97,10 +103,16 @@ namespace FlappyXna.Objects
             base.Update(gameTime);
         }
 
-        private void OnCollide(IPhysicsBody body)
+        private void OnCollide(ICollidable body)
         {
-            if(body is Ground)
+            if (this.Velocity.Y < 0)
             {
+                Velocity = new Vector2(0, 0);
+            }
+
+            if (body is Ground && !this.OnGround)
+            {
+                this.OnGround = true;
                 this.IsAlive = false;
             }
         }
@@ -108,8 +120,13 @@ namespace FlappyXna.Objects
         public override void Draw(GameTime gameTime)
         {
             var sourceRectangle = new Rectangle(currentFrame * BIRD_SPRITE_WIDTH, 0, BIRD_SPRITE_WIDTH, BIRD_SPRITE_HEIGHT);
-            var destinationRectangle = new Rectangle((int)X, (int)Y, BIRD_SPRITE_WIDTH, BIRD_SPRITE_HEIGHT);
-            spriteBatch.Draw(texture, destinationRectangle, sourceRectangle, Color.White, MathHelper.ToRadians(angle), origin,SpriteEffects.None,1);
+            var destinationRectangle = new Rectangle((int)(X), (int)(Y), BIRD_SPRITE_WIDTH, BIRD_SPRITE_HEIGHT);     
+            spriteBatch.Draw(texture, destinationRectangle, sourceRectangle, Color.White, MathHelper.ToRadians(angle), new Vector2(origin.X * BIRD_SPRITE_WIDTH, origin.Y * BIRD_SPRITE_HEIGHT), SpriteEffects.None,1);
+
+            //if (AABB.HasValue)
+            //{
+            //    spriteBatch.Draw(debugTexture, AABB.Value, null, Color.White, 0.0f, Vector2.Zero, SpriteEffects.None, 1);
+            //}
             base.Draw(gameTime);
         }
     }

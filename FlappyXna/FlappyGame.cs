@@ -59,7 +59,6 @@ namespace FlappyXna
 
             ground = new Ground(this);
             this.Components.Add(ground);
-            physics.AddBody(ground);
 
             pipes = new List<Pipes>();
 
@@ -86,7 +85,7 @@ namespace FlappyXna
 
         protected override void Update(GameTime gameTime)
         {
-            physics.CheckCollision(bird, ground, OnBirdCollided);
+            physics.CheckCollision(bird, ground, OnBirdGroundCollided);
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
@@ -108,13 +107,18 @@ namespace FlappyXna
                 }
             }
 
-            pipes.ForEach(p => p.Update(gameTime));
+            pipes.ForEach(p =>
+            {
+                physics.CheckCollision(bird, p.TopPipe, OnBirdPipesCollided);
+                physics.CheckCollision(bird, p.BottomPipe, OnBirdPipesCollided);
+                p.Update(gameTime);
+            });
 
             base.Update(gameTime);
 
             lastKeyboardState = currentKeyboardState;
         }
-
+        
         private void GeneratePipes()
         {
             //if (System.Diagnostics.Debugger.IsAttached)
@@ -134,18 +138,22 @@ namespace FlappyXna
            newPipes.Reset(width + 20, pipesY);
         }
 
-        private void OnBirdCollided(IPhysicsBody bird, IPhysicsBody enemy)
+        private void OnBirdPipesCollided(ICollidable bird, ICollidable pipe)
         {
-            var actualBird = bird as Bird;
-            if (!actualBird.OnGround)
-            {
-                actualBird.OnGround = true;
-            }
+            bird.OnCollideWith(pipe);
+            CheckGameOver();
+        }
 
+        private void OnBirdGroundCollided(ICollidable bird, ICollidable ground)
+        {
+            bird.OnCollideWith(ground);
+            CheckGameOver();
+        }
+
+        private void CheckGameOver() { 
             if (!gameOver)
             {
                 gameOver = true;
-                actualBird.IsAlive = false;
                 ground.IsAlive = false;
                 panorama.IsAlive = false;
                 pipes.ForEach(p => p.IsAlive = false);
