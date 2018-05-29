@@ -19,6 +19,7 @@ namespace FlappyXna
         List<Pipes> pipes;
 
         PhysicsEngine physics;
+        TweenEngine tweener;
 
         KeyboardState lastKeyboardState;
         bool gameOver;
@@ -49,6 +50,9 @@ namespace FlappyXna
 
             physics = new PhysicsEngine(this);
             this.Components.Add(physics);
+
+            tweener = new TweenEngine();
+            this.Services.AddService(tweener);
 
             panorama = new Panorama(this);
             this.Components.Add(panorama);
@@ -85,6 +89,8 @@ namespace FlappyXna
 
         protected override void Update(GameTime gameTime)
         {
+            tweener.Update(gameTime);
+
             physics.CheckCollision(bird, ground, OnBirdGroundCollided);
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -101,10 +107,7 @@ namespace FlappyXna
                     pipes.Clear();
                     pipeGenerator.Start();
                 }
-                else
-                {
-                    bird.Flap();
-                }
+                bird.Flap();
             }
 
             pipes.ForEach(p =>

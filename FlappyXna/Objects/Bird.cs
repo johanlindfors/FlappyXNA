@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace FlappyXna.Objects
 {
-    class Bird : DrawableGameComponent, IPhysicsBody, ICollidable
+    class Bird : DrawableGameComponent, IPhysicsBody, ICollidable, ITweenable
     {
         private Texture2D texture;
         private Texture2D debugTexture;
@@ -14,9 +14,9 @@ namespace FlappyXna.Objects
         private float currentTimeDelta = 0;
         private const int BIRD_SPRITE_WIDTH = 34;
         private const int BIRD_SPRITE_HEIGHT = 24;
-        private float angle = 0.0f;
         private Vector2 origin = new Vector2(0.5f, 0.5f);
 
+        public float Angle { get; set; } = 0.0f;
         public float X { get; set; }
         public float Y { get; set; }
         public Vector2 Velocity { get; set; }
@@ -33,6 +33,7 @@ namespace FlappyXna.Objects
         public bool OnGround { get; set; }
 
         public bool IsAlive { get; set; }
+        public bool IsKilled { get; set; }
 
         public Bird(Game game) : base(game)
         {
@@ -46,9 +47,10 @@ namespace FlappyXna.Objects
             X = 100;
             Y = this.Game.Window.ClientBounds.Height / 2;
 
-            angle = 0;
+            Angle = 0;
             currentTimeDelta = 0;
             IsAlive = true;
+            IsKilled = false;
             AllowGravity = true;
             OnCollideWith = OnCollide;
             OnGround = false;
@@ -79,13 +81,13 @@ namespace FlappyXna.Objects
             if (IsAlive)
             {
                 Velocity = new Vector2(0, -400);
-                this.angle = -60f;
+                this.Game.Services.GetService<TweenEngine>().Add(this).To(() => Angle, (v) => Angle = v, -40, 100).Start();
             }
         }
 
         public override void Update(GameTime gameTime)
         {
-            if (OnGround) return;
+            if (OnGround || IsKilled) return;
 
             currentTimeDelta += gameTime.ElapsedGameTime.Milliseconds;
             if (currentTimeDelta > 1000 / 12)
@@ -95,9 +97,9 @@ namespace FlappyXna.Objects
                 currentFrame %= 3;
             }
 
-            if (this.angle < 90 && IsAlive)
+            if (this.Angle < 90 && IsAlive)
             {
-                this.angle += 2.5f;
+                this.Angle += 2.5f;
             }
 
             base.Update(gameTime);
@@ -108,6 +110,9 @@ namespace FlappyXna.Objects
             if (this.Velocity.Y < 0)
             {
                 Velocity = new Vector2(0, 0);
+                IsKilled = true;
+                var duration = 90 / this.Y * 300;
+                this.Game.Services.GetService<TweenEngine>().Add(this).To(() => Angle, (v) => Angle = v, 90, duration).Start();
             }
 
             if (body is Ground && !this.OnGround)
@@ -121,7 +126,7 @@ namespace FlappyXna.Objects
         {
             var sourceRectangle = new Rectangle(currentFrame * BIRD_SPRITE_WIDTH, 0, BIRD_SPRITE_WIDTH, BIRD_SPRITE_HEIGHT);
             var destinationRectangle = new Rectangle((int)(X), (int)(Y), BIRD_SPRITE_WIDTH, BIRD_SPRITE_HEIGHT);     
-            spriteBatch.Draw(texture, destinationRectangle, sourceRectangle, Color.White, MathHelper.ToRadians(angle), new Vector2(origin.X * BIRD_SPRITE_WIDTH, origin.Y * BIRD_SPRITE_HEIGHT), SpriteEffects.None,1);
+            spriteBatch.Draw(texture, destinationRectangle, sourceRectangle, Color.White, MathHelper.ToRadians(Angle), new Vector2(origin.X * BIRD_SPRITE_WIDTH, origin.Y * BIRD_SPRITE_HEIGHT), SpriteEffects.None,1);
 
             //if (AABB.HasValue)
             //{
