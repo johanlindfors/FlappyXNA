@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace FlappyXna.Objects
 {
-    class Bird : DrawableGameComponent, IPhysicsBody, ICollidable, ITweenable
+    class Bird : DrawableGameComponent, IPhysicsBody, ICollidable
     {
         private Texture2D texture;
         private Texture2D debugTexture;
@@ -81,7 +81,7 @@ namespace FlappyXna.Objects
             if (IsAlive)
             {
                 Velocity = new Vector2(0, -400);
-                this.Game.Services.GetService<TweenEngine>().Add(this).To(() => Angle, (v) => Angle = v, -40, 100).Start();
+                this.Game.Services.GetService<TweenEngine>().Add().To(() => Angle, (v) => Angle = v, -40, 100);
             }
         }
 
@@ -112,7 +112,7 @@ namespace FlappyXna.Objects
                 Velocity = new Vector2(0, 0);
                 IsKilled = true;
                 var duration = 90 / this.Y * 300;
-                this.Game.Services.GetService<TweenEngine>().Add(this).To(() => Angle, (v) => Angle = v, 90, duration).Start();
+                this.Game.Services.GetService<TweenEngine>().Add().To(() => Angle, (v) => Angle = v, 90, duration);
             }
 
             if (body is Ground && !this.OnGround)

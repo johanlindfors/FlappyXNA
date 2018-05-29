@@ -6,20 +6,15 @@ using System.Linq.Expressions;
 
 namespace FlappyXna
 {
-    interface ITweenable
-    {
-
-    }
-
     interface ITween
     {
         bool IsComplete { get; }
         void Update(GameTime gameTime);
+        ITween To(Func<float> getter, Action<float> setter, float targetValue, float duration);
     }
 
     class Tween : ITween
     {
-        ITweenable parent;
         float duration;
         float elapsed;
         float targetValue;
@@ -27,12 +22,12 @@ namespace FlappyXna
         Action<float> tweenFunc;
         public bool IsComplete { get; private set; }
 
-        public Tween(ITweenable parent)
+        public Tween()
         {
-            this.parent = parent;
+
         }
 
-        public Tween To(Func<float> getter, Action<float> setter, float targetValue, float duration)
+        public ITween To(Func<float> getter, Action<float> setter, float targetValue, float duration)
         {
             this.originalValue = getter();
             this.targetValue = targetValue;
@@ -42,8 +37,6 @@ namespace FlappyXna
             IsComplete = false;
             return this;
         }
-
-        public void Start() { }
 
         public void Update(GameTime gameTime)
         {
@@ -69,11 +62,10 @@ namespace FlappyXna
             objects = new List<ITween>();
         }
 
-        public Tween Add(ITweenable parent)
+        public ITween Add()
         {
-            var tween = new Tween(parent);
-            objects.Add(tween);
-            return tween;
+            objects.Add(new Tween());
+            return objects[objects.Count-1];
         }
 
         public void Update(GameTime gameTime)
