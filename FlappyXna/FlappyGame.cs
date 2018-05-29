@@ -39,7 +39,7 @@ namespace FlappyXna
             rnd = new Random(1223);
 
             pipeGenerator = new Timer(1250);
-            pipeGenerator.Elapsed += (_,__) => GeneratePipes();
+            pipeGenerator.Elapsed += delegate { GeneratePipes(); };
         }
 
         protected override void Initialize()
@@ -124,18 +124,11 @@ namespace FlappyXna
         
         private void GeneratePipes()
         {
-            //if (System.Diagnostics.Debugger.IsAttached)
-            //{
-            //    pipeGenerator.Stop();
-            //}
             var newPipes = pipes.Where(p => !p.IsAlive).FirstOrDefault();
             if (newPipes == null)
             {
                 newPipes = new Pipes(this);
                 pipes.Add(newPipes);
-            } else
-            {
-
             }
             var pipesY = (int)(rnd.NextDouble() * 200 - 100);
            newPipes.Reset(width + 20, pipesY);
