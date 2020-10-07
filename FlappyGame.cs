@@ -31,9 +31,6 @@ namespace FlappyXna
         public FlappyGame()
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferHeight = 505;
-            graphics.PreferredBackBufferWidth = 288;
-            graphics.ApplyChanges();
             Content.RootDirectory = "Content";
             gameOver = true;
             rnd = new Random(1223);
@@ -44,6 +41,11 @@ namespace FlappyXna
 
         protected override void Initialize()
         {
+            // Need to change this in Initialize to work on linux
+            graphics.PreferredBackBufferHeight = 505;
+            graphics.PreferredBackBufferWidth = 288;
+            graphics.ApplyChanges();
+
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             this.Services.AddService<SpriteBatch>(spriteBatch);
