@@ -2,7 +2,7 @@
     "files.exclude": {
         ".*/**": true,
         ".vscode/**": true,
-        "bin/**": true,
-        "obj/**": true
+        "**/bin/**": true,
+        "**/obj/**": true
     }
 }
